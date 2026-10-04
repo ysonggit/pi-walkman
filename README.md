@@ -29,3 +29,25 @@ python3 walkman.py --window --demo
 - No sound: check the sink in `~/.config/go-librespot/config.yml` against `wpctl status`;
   re-run with `SINK=<node.name> ./install.sh` for another output.
 - Screen log: `/tmp/walkman.log` when started by hand.
+
+## walkmanctl (bridge for voice/chat agents)
+
+A stdlib-only CLI that talks to the same `:3678` API. It does not touch `walkman.py` or the player.
+Every call prints one JSON line; `confirmation` is `confirmed` only after the player is seen playing
+(position advancing), otherwise `unconfirmed`.
+
+```bash
+rsync -a --exclude __pycache__ walkman_bridge walkmanctl yang@groundmind.local:walkman/
+walkman/walkmanctl status
+walkman/walkmanctl play --title "Yesterday" --artist "The Beatles"   # plays, or returns needs_choice
+walkman/walkmanctl play --candidate 2                                # pick from the last needs_choice
+walkman/walkmanctl play --link https://open.spotify.com/{track|playlist|album}/<id>   # or --uri spotify:<kind>:<id>
+walkman/walkmanctl control pause|resume|next|previous
+```
+
+Searching by name needs a Spotify developer app (client credentials, no user login). Put it in
+`~/.config/walkman-bridge/spotify.json` with `chmod 600`:
+`{"client_id": "...", "client_secret": "...", "market": "DE"}`.
+A title with no artist, or a live/cover/karaoke match, returns `needs_choice` instead of guessing.
+
+Tests: `python3 -m unittest discover -s tests`
