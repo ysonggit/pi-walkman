@@ -441,6 +441,7 @@ def on_active_vt():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--window", action="store_true", help="480x320 window instead of fullscreen")
+    ap.add_argument("--flip", action="store_true", help="rotate the picture 180 degrees (screen mounted upside down)")
     ap.add_argument("--demo", action="store_true", help="fake playback, no go-librespot")
     args = ap.parse_args()
 
@@ -464,7 +465,8 @@ def main():
                 return
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 sw = screen.get_width()
-                kind = "prev" if ev.pos[0] < sw / 3 else "next" if ev.pos[0] > sw * 2 / 3 else "playpause"
+                x = sw - ev.pos[0] if args.flip else ev.pos[0]
+                kind = "prev" if x < sw / 3 else "next" if x > sw * 2 / 3 else "playpause"
                 player.command("/player/" + kind)
                 tape.tap(kind)
 
@@ -475,10 +477,11 @@ def main():
         dt = clock.tick(20 if s["playing"] or tape.flash else 6) / 1000
         tape.update(s, dt)
         tape.draw(frame, s)
+        out = pygame.transform.flip(frame, True, True) if args.flip else frame
         if screen.get_size() == (W, H):
-            screen.blit(frame, (0, 0))
+            screen.blit(out, (0, 0))
         else:
-            screen.blit(pygame.transform.smoothscale(frame, screen.get_size()), (0, 0))
+            screen.blit(pygame.transform.smoothscale(out, screen.get_size()), (0, 0))
         pygame.display.flip()
 
 

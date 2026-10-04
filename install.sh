@@ -85,7 +85,7 @@ cat > "$HOME/.config/autostart/walkman.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Walkman
-Exec=python3 $HERE/walkman.py
+Exec=python3 $HERE/walkman.py${WALKMAN_FLIP:+ --flip}
 X-GNOME-Autostart-enabled=true
 EOF
 
